@@ -43,24 +43,6 @@ angular.module('myApp.filters', []).
   }]
 )
 
-.filter('buildStatus', ['_', function (_) {
-    return function (builds, status) {
-      var result = [];
-      if(builds) {
-        _.each(builds, function(build) {
-          if(build.data.result === status) {
-           result.push(build);
-           return false;
-          }
-
-          return true;
-        });
-      }
-      return result;
-    };
-  }]
-)
-
 .filter('taskStatusNot', ['_', function (_) {
     return function (tasks, status, status2) {
       var result = [];

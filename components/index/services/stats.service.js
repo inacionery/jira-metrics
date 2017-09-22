@@ -48,6 +48,7 @@ appServices.factory('Statistics', function ($resource, config) {
     _.each(issues.issueData, function(issue) {
       var startDate;
       _.each(issue.fields.subtasks, function(subtask) {
+        console.log("gatherIssueTime " + subtask.fields.issuetype.name);
         if (subtask.fields.issuetype.name === "Design Review Sub-Task") {
           startDate = findStartDate(subtask.self);
         }
@@ -129,18 +130,35 @@ appServices.factory('Statistics', function ($resource, config) {
 
     var people = [];
     _.each(issues, function(issue) {
-      people.push(issue.fields.assignee);
+      let name = issue.fields.assignee.name;
+      if (name == 'inacio.nery'
+        || name == 'adam.brandizzi'
+        || name == 'leonardo.barros'
+        || name == 'marcellus.tavares'
+        || name == 'rafael.praxedes'
+        || name == 'pedro.queiroz'
+        || name == 'lino.alves') {
+          people.push(issue.fields.assignee);
+      }
     });
 
     return getUniquePeople(people);
   }
 
   function getPeopleFromWindow(periodWindow) {
-
     var people = [];
     _.each(periodWindow, function(periodIssues) {
       _.each(periodIssues.issues, function(issue) {
-        people.push(issue.fields.assignee);
+        let name = issue.fields.assignee.name;
+        if (name == 'inacio.nery'
+          || name == 'adam.brandizzi'
+          || name == 'leonardo.barros'
+          || name == 'marcellus.tavares'
+          || name == 'rafael.praxedes'
+          || name == 'pedro.queiroz'
+          || name == 'lino.alves') {
+            people.push(issue.fields.assignee);
+          }
       });
     });
 

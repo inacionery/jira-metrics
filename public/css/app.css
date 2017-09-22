@@ -113,6 +113,10 @@ ul.sidebar .sidebar-list a.active {
     margin: 0 auto;
 }
 
+.img-thumbnail {
+  max-width: 48px;
+}
+
 .no-padding {
   padding: 0px;
 }

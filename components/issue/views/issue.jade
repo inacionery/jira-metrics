@@ -4,7 +4,7 @@
   a(href='{{config.jiraHostName}}/browse/{{ issue.key }}', target='_blank') {{ issue.key }}
   .pull-right.dim(style="margin-right:20px", title="{{issue.fields.updated | date:'medium'}}") Last updated {{issue.fields.updated | amTimeAgo}}
   br
-  img(ng-src='{{issue.fields.priority.iconUrl}}', title='{{issue.fields.priority.name}}', style='margin-right: 5px;')
+  img(ng-src='{{issue.fields.priority.iconUrl}}', title='{{issue.fields.priority.name}}', style='margin-right: 5px; width: 15px;')
   | {{ issue.fields.summary }}
 .row(ng-show="issue.fields.subtasks || issue.fields.customfield_10494")
   br

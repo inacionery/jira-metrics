@@ -13,9 +13,9 @@ angularModules.config(function ($stateProvider, $urlRouterProvider, routes) {
   });
 });
 angular.module('myApp')
-    .controller('IndexCtrl', ['$scope', '$rootScope', '$filter', 'config', 'JIRA', 'Statistics', 'Jenkins', '$interval', '_', '$http', '$q', 'Fullscreen', IndexCtrl]);
+    .controller('IndexCtrl', ['$scope', '$rootScope', '$filter', 'config', 'JIRA', 'Statistics', '$interval', '_', '$http', '$q', 'Fullscreen', IndexCtrl]);
 
-function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, Jenkins, $interval, _, $http, $q,Fullscreen) {
+function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $interval, _, $http, $q,Fullscreen) {
   $scope.config = config;
 
   $scope.toggleFullScreen = function(chartOptions) {
@@ -75,27 +75,6 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, Jenkin
 
     return statusClass;
   }
-
-  $scope.addBuild = function (displayName, buildName) {
-    buildName = buildName || displayName;
-
-    $scope.totalBuilds += 1;
-    var build = {
-      displayName: displayName
-    };
-
-    runAndSchedule(function () {
-      build.data = Jenkins.build(buildName).get();
-    });
-
-    $scope.builds.push(build);
-  };
-
-  $scope.builds = [];
-  $scope.addBuild('incubator-taverna-engine');
-  $scope.addBuild('AuroraBot');
-  $scope.addBuild('Hadoop-Mapreduce-trunk-Java8');
-  $scope.addBuild('Lucene-Artifacts-5.0');
 
   function buildCreatedVsResolved() {
     $scope.createdJiras = JIRA.created.get();

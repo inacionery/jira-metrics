@@ -59,11 +59,11 @@ exports.throughputData = function (req, res) {
   var issueTypes = req.query.issueTypes;
   var completionTypes = req.query.completionTypes;
 
-  var query = "project in (" + projects.join(',') + ") AND issuetype in (" + issueTypes.join(',') + ") AND resolution in (" + completionTypes.join(',') + ") AND resolutiondate > endOfWeek(-23)";
+  var query = "project in (" + projects.join(',') + ") AND issuetype in (" + issueTypes.join(',') + ") AND resolution in (" + completionTypes.join(',') + ") AND resolutiondate > endOfWeek(-23) AND component in (subcomponents(LPS, Workflow, 'true'), subcomponents(LPS, 'Business Productivity', 'true'),subcomponents(LPS, Calendar, 'true'))";
 
   var data = {
     "jql": query,
-    "fields": ["key", "issuetype", "assignee", "created", "resolutiondate", "customfield_10494"],
+    "fields": ["key", "issuetype", "assignee", "created", "resolutiondate", "Participants of an Issue"],
     "maxResults": 250
   };
 
@@ -78,7 +78,7 @@ exports.allIssuesPerWeek = function (req, res) {
   var issueTypes = req.query.issueTypes;
   var weekNumber = req.query.weekNumber;
 
-  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND status was in (Open) on endOfWeek(-' + weekNumber + ')';
+  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND status was in (Open) on endOfWeek(-' + weekNumber + ') AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))';
 
   var data = {
     "jql": query,
@@ -96,7 +96,7 @@ exports.search = function (req, res) {
   var issueTypes = req.query.issueTypes;
   var search = req.query.search;
 
-  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND (' + search + ')';
+  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND (' + search + ') AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))';
 
   var data = {
     "jql": query,
@@ -113,7 +113,7 @@ exports.searchSimple = function (req, res) {
   var issueTypes = req.query.issueTypes;
   var search = req.query.search;
 
-  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND (' + search + ')';
+  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND (' + search + ') AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))';
 
   var data = {
     "jql": query,
@@ -131,7 +131,7 @@ exports.unfinished = function (req, res) {
   var issueTypes = req.query.issueTypes;
   var search = req.query.search;
 
-  var query = 'issue in parentIssuesFromQuery("project = Resource AND type = \\"Code Review Sub-Task\\" AND resolution != Rejected") AND resolution = Unresolved AND (sprint is EMPTY OR sprint not in openSprints())';
+  var query = 'resolution = Unresolved AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))';
 
   var data = {
     "jql": query,

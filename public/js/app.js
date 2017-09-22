@@ -19,36 +19,16 @@ var angularModules = angular.module('myApp', [
   'FBAngular',
 ]);
 
-var jiraHostName = 'https://resourceful.atlassian.net';
-var confluenceHostName = 'https://resourceful.atlassian.net';
-var mercurialHostName = 'https://resourceful.atlassian.net';
-var jenkinsHostName = 'https://builds.apache.org';
+var jiraHostName = 'https://issues.liferay.com';
 
 angularModules.value('config', {
   title: 'Metrics Dashboard',
   jiraHostName: jiraHostName,
-  confluenceHostName: confluenceHostName,
-  mercurialHostName: mercurialHostName,
-  jenkinsHostName: jenkinsHostName,
-  projects: ["'Resource'"],
-  issueTypes: ['Bug', '"New Feature"', 'Improvement', 'Technical', 'Task'],
-  completionTypes: ['Fixed'],
+  projects: ['"PUBLIC - Liferay Portal Community Edition"'],
+  issueTypes: ['Bug', '"Regression Bug"', 'Task', 'Story', '"Technical Task"'],
+  completionTypes: ['Fixed','Completed'],
   slideTimeInSecs: 45,
   updateTimeInMins: 10,
-  agileColumns: [
-    {
-      name: 'TODO',
-      statuses: ['Open', 'Reopened', 'Awaiting Assignment', 'Inactive']
-    },
-    {
-      name: 'In Progress',
-      statuses: ['In Progress']
-    },
-    {
-      name: 'Done',
-      statuses: ['Closed', 'Resolved']
-    }
-  ],
 });
 
 angularModules.constant('routes', [
@@ -56,11 +36,6 @@ angularModules.constant('routes', [
     name: 'Metrics',
     url: 'metrics',
     icon: 'fa-bar-chart'
-  },
-  {
-    name: 'Agile',
-    url: 'agile',
-    icon: 'fa-tachometer'
   },
   {
     name: 'Activity',
@@ -71,11 +46,6 @@ angularModules.constant('routes', [
     name: 'JIRA',
     url: 'jira',
     icon: 'fa-child'
-  },
-  {
-    name: 'Jenkins',
-    url: 'jenkins',
-    icon: 'fa-cube'
   },
 ]);
 

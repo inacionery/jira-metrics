@@ -4,7 +4,7 @@ appServices.factory('JIRA', function ($resource, config) {
                             jiraHostName: config.jiraHostName,
                             'projects[]': config.projects,
                             'completionTypes[]': config.completionTypes,
-                            issueTypes: config.issueTypes
+                            issueTypes: config.issueTypes,
                           },
                           {
                             get : {
@@ -13,31 +13,11 @@ appServices.factory('JIRA', function ($resource, config) {
                                 }
                          }),
 
-        currentSprint: function(component) {
-                          var search = 'Sprint in openSprints()';
-                          if(component) {
-                            search += ' AND component = "' + component + '"'
-                          }
-
-                          return $resource('api/search', {
-                              jiraHostName: config.jiraHostName,
-                              'projects[]': config.projects,
-                              issueTypes: config.issueTypes,
-                              search:  search,
-                          },
-                          {
-                            get : {
-                                    method : 'GET',
-                                    cache: true
-                                }
-                         });
-                        },
-
         dailyCreated: $resource('api/search', {
                               jiraHostName: config.jiraHostName,
                               'projects[]': config.projects,
                               issueTypes: config.issueTypes,
-                              search: 'created >= "-1d 1h"',
+                              search: 'created >= "-1d 1h" AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))',
                           },
                           {
                             get : {
@@ -50,7 +30,7 @@ appServices.factory('JIRA', function ($resource, config) {
                               jiraHostName: config.jiraHostName,
                               'projects[]': config.projects,
                               issueTypes: config.issueTypes,
-                              search: 'created >= endOfWeek(-23)',
+                              search: 'created >= endOfWeek(-23) AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))',
                           },
                           {
                             get : {
@@ -63,7 +43,7 @@ appServices.factory('JIRA', function ($resource, config) {
                               jiraHostName: config.jiraHostName,
                               'projects[]': config.projects,
                               issueTypes: config.issueTypes,
-                              search: 'resolutiondate >= endOfWeek(-23)',
+                              search: 'resolutiondate >= endOfWeek(-23) AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))',
                           },
                           {
                             get : {
@@ -74,7 +54,8 @@ appServices.factory('JIRA', function ($resource, config) {
 
         unfinishedJIRAs: $resource('api/unfinished', {
                               jiraHostName: config.jiraHostName,
-                              'projects[]': config.projects
+                              'projects[]': config.projects,
+                              search: 'component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))',
                           },
                           {
                             get : {

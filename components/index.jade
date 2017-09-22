@@ -19,15 +19,9 @@ block body
               span.menu-icon.fa(class="{{route.icon}}")
 
         .sidebar-footer
-          .col-xs-3
+          .col-xs-12
             a(href='{{config.jiraHostName}}/secure/Dashboard.jspa', target='_blank')
               | JIRA
-          .col-xs-4
-            a(href='{{config.confluenceHostName}}', target='_blank')
-              | Confluence
-          .col-xs-5
-            a(href='{{config.mercurialHostName}}', target='_blank')
-              | Mercurial
       #content-wrapper
         .page-content
           .row.header
@@ -51,7 +45,7 @@ block body
                   | Home / {{capitalizeFirstLetter(state.current.name)}}
           div(ui-view="searchPanel", style="height:100%;", ng-controller='IndexCtrl')
 
-  script(src='jquery/dist/jquery.js')
+  script(src='jquery/dist/jquery.min.js')
   script(src='angular/angular.js')
   script(src='angular-resource/angular-resource.min.js')
   script(src='angular-cookies/angular-cookies.min.js')
@@ -60,8 +54,8 @@ block body
   script(src='lodash/dist/lodash.underscore.min.js')
   script(src='d3/d3.min.js')
   script(src='simple-statistics/src/simple_statistics.js')
-  script(src='momentjs/min/moment.min.js')
-  script(src='momentjs/min/locales.min.js')
+  script(src='moment/min/moment.min.js')
+  script(src='moment/min/locales.min.js')
   script(src='nvd3/nv.d3.js')
   script(src='angular-nvd3/dist/angular-nvd3.js')
   script(src='angular-sanitize/angular-sanitize.min.js')
@@ -69,7 +63,7 @@ block body
   script(src='angular-timer/dist/angular-timer.js')
   script(src='angular-timer/app/js/i18nService.js')
   script(src='angular-filter/dist/angular-filter.min.js')
-  script(src='angular-moment/angular-moment.js')
+  script(src='angular-moment/angular-moment.min.js')
   script(src='angular-fullscreen/src/angular-fullscreen.js')
 
   script(src='js/xml2json.js')
@@ -82,7 +76,6 @@ block body
 
   script(src='js/app.js')
   script(src='index/directive/feed.js')
-  script(src='agileboard/directive/agileboard.js')
   script(src='issue/directive/issue.js')
   script(src='js/services.js')
   script(src='js/filters.js')
@@ -90,7 +83,6 @@ block body
 
   script(src='index/services/jira.service.js')
   script(src='index/services/stats.service.js')
-  script(src='index/services/jenkins.service.js')
   script(src='index/controller/masterController.js')
   script(src='index/controller/indexController.js')
   script(src='index/directive/throughput.js')
