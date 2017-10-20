@@ -16,7 +16,7 @@ var angularModules = angular.module('myApp', [
   'timer',
   'angular.filter',
   'angularMoment',
-  'FBAngular',
+  'FBAngular'
 ]);
 
 var jiraHostName = 'https://issues.liferay.com';
@@ -25,10 +25,14 @@ angularModules.value('config', {
   title: 'Metrics Dashboard',
   jiraHostName: jiraHostName,
   projects: ['"PUBLIC - Liferay Portal Community Edition"'],
-  issueTypes: ['Bug', '"Regression Bug"', 'Task', 'Story', '"Technical Task"'],
-  completionTypes: ['Fixed','Completed'],
+  issueTypes: [
+    'Bug', '"Regression Bug"', 'Task', 'Story', '"Technical Task"'
+  ],
+  completionTypes: [
+    'Fixed', 'Completed'
+  ],
   slideTimeInSecs: 45,
-  updateTimeInMins: 10,
+  updateTimeInMins: 10
 });
 
 angularModules.constant('routes', [
@@ -36,23 +40,21 @@ angularModules.constant('routes', [
     name: 'Metrics',
     url: 'metrics',
     icon: 'fa-bar-chart'
-  },
-  {
+  }, {
     name: 'Activity',
     url: 'activity',
     icon: 'fa-quote-right'
-  },
-  {
+  }, {
     name: 'JIRA',
     url: 'jira',
     icon: 'fa-child'
-  },
+  }
 ]);
 
-angularModules.config(function ($stateProvider, $urlRouterProvider, $locationProvider) {
+angularModules.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
   $locationProvider.html5Mode(true);
 });
 
 angularModules.run(function(amMoment) {
-    amMoment.changeLocale('en');
+  amMoment.changeLocale('en');
 });

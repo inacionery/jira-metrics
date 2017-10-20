@@ -16,7 +16,7 @@ var auth = process.env.JIRA_AUTH;
 var username = process.env.JIRA_USERNAME;
 var password = process.env.JIRA_PASSWORD;
 
-if(!auth && username) {
+if (!auth && username) {
   auth = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
 }
 
@@ -26,33 +26,34 @@ function jiraPostRequest(res, jiraUrl, data, cacheTimeout) {
   var args = {
     path: {},
     parameters: {},
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     requestConfig: {
       timeout: 10000
     },
-    data: data,
+    data: data
   };
 
-  if(auth) {
+  if (auth) {
     args.headers.Authorization = auth;
   }
 
-
   var cachedData = cache.get(cacheKey);
-  if(cachedData) {
+  if (cachedData) {
     console.log('Using cache for "' + cacheKey + '"');
     res.json(cachedData);
     return;
   }
 
   console.log('Making call to ' + jiraUrl);
-  restClient.post(jiraUrl, args, function (result, response) {
+  restClient.post(jiraUrl, args, function(result, response) {
     cache.put(cacheKey, result, cacheTimeout);
     res.json(result);
   });
 }
 
-exports.throughputData = function (req, res) {
+exports.throughputData = function(req, res) {
 
   var hostname = req.query.jiraHostName;
   var projects = req.query.projects;
@@ -63,15 +64,21 @@ exports.throughputData = function (req, res) {
 
   var data = {
     "jql": query,
-    "fields": ["key", "issuetype", "assignee", "created", "resolutiondate", "Participants of an Issue"],
+    "fields": [
+      "key",
+      "issuetype",
+      "assignee",
+      "created",
+      "resolutiondate",
+      "Participants of an Issue"
+    ],
     "maxResults": 250
   };
 
   jiraPostRequest(res, hostname + '/rest/api/latest/search', data, DAY_IN_MILLIS);
 };
 
-
-exports.allIssuesPerWeek = function (req, res) {
+exports.allIssuesPerWeek = function(req, res) {
 
   var hostname = req.query.jiraHostName;
   var projects = req.query.projects;
@@ -82,14 +89,16 @@ exports.allIssuesPerWeek = function (req, res) {
 
   var data = {
     "jql": query,
-    "fields": ["key", "issuetype", "subtasks"],
+    "fields": [
+      "key", "issuetype", "subtasks"
+    ],
     "maxResults": 1500
   };
 
   jiraPostRequest(res, hostname + '/rest/api/latest/search', data, DAY_IN_MILLIS);
 };
 
-exports.search = function (req, res) {
+exports.search = function(req, res) {
 
   var hostname = req.query.jiraHostName;
   var projects = req.query.projects;
@@ -106,7 +115,7 @@ exports.search = function (req, res) {
   jiraPostRequest(res, hostname + '/rest/api/latest/search', data, HOUR_IN_MILLIS);
 };
 
-exports.searchSimple = function (req, res) {
+exports.searchSimple = function(req, res) {
 
   var hostname = req.query.jiraHostName;
   var projects = req.query.projects;
@@ -117,14 +126,16 @@ exports.searchSimple = function (req, res) {
 
   var data = {
     "jql": query,
-    "fields": ["key", "resolutiondate", "created"],
+    "fields": [
+      "key", "resolutiondate", "created"
+    ],
     "maxResults": 5000
   };
 
   jiraPostRequest(res, hostname + '/rest/api/latest/search', data, HOUR_IN_MILLIS);
 };
 
-exports.unfinished = function (req, res) {
+exports.unfinished = function(req, res) {
 
   var hostname = req.query.jiraHostName;
   var projects = req.query.projects;
@@ -141,28 +152,28 @@ exports.unfinished = function (req, res) {
   jiraPostRequest(res, hostname + '/rest/api/latest/search', data, DAY_IN_MILLIS);
 };
 
-exports.issueDetail = function (req, res) {
+exports.issueDetail = function(req, res) {
 
   var issueUrl = req.query.issueUrl || req.params["issueUrl"];
 
   console.log(issueUrl);
-  restClient.get(issueUrl, function (data, response) {
+  restClient.get(issueUrl, function(data, response) {
     res.json(data);
   });
 };
 
-exports.xml = function (req, res) {
+exports.xml = function(req, res) {
   var url = req.query.url;
 
   var args = {
     headers: {}
   };
 
-  if(auth) {
+  if (auth) {
     args.headers.Authorization = auth;
   }
 
-  restClient.get(url, args, function (data, response) {
+  restClient.get(url, args, function(data, response) {
     res.set('Content-Type', 'text/xml');
     res.send(data);
   });

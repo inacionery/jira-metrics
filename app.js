@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies
  */
@@ -12,7 +11,6 @@ var express = require('express'),
   path = require('path');
 
 var app = module.exports = express();
-
 
 /**
  * Configuration
@@ -45,9 +43,9 @@ if (app.get('env') === 'production') {
  * Routes
  */
 
- var callback = function() {
-   // noop
- };
+var callback = function() {
+  // noop
+};
 
 // serve index and view partials
 app.get('/', routes.index);
@@ -84,11 +82,9 @@ app.get('/api/issueDetails', function(req, res) {
 //redirect all others to the index (HTML5 history)
 app.get('*', routes.index);
 
-
 /**
  * Start Server
  */
-http.createServer(app).listen(app.get('port'), function () {
+http.createServer(app).listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
-

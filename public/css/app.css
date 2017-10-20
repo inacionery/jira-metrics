@@ -1,4 +1,5 @@
 /* Override some defaults */
+
 html, body {
   height: 100%;
   overflow-x: hidden;
@@ -8,33 +9,39 @@ body {
   /*padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
 }
 
-.container > footer p {
-  text-align: center; /* center align it with the container */
+.container>footer p {
+  text-align: center;
+  /* center align it with the container */
 }
 
 .container .unfixed-width {
   width: 90%;
 }
 
+
 /* The white background content wrapper */
+
 .content {
   background-color: #fff;
   padding: 20px;
-  margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+  margin: 0 -20px;
+  /* negative indent the amount of the padding to maintain the grid system */
   -webkit-border-radius: 0 0 6px 6px;
-     -moz-border-radius: 0 0 6px 6px;
-          border-radius: 0 0 6px 6px;
-  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-     -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-          box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  -moz-border-radius: 0 0 6px 6px;
+  border-radius: 0 0 6px 6px;
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+  -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
 }
 
 .spacer {
   margin-left: 20px;
-  display:inline;
+  display: inline;
 }
 
+
 /* co-currence matrix */
+
 .background {
   fill: #eee;
 }
@@ -47,10 +54,14 @@ text.active {
   fill: red;
 }
 
+
 /* bootstrap customisation */
+
 .modal {
-    width: 70%; /* respsonsive width */
-    margin-left:-35%; /* width/2) */
+  width: 70%;
+  /* respsonsive width */
+  margin-left: -35%;
+  /* width/2) */
 }
 
 .drop {
@@ -67,7 +78,9 @@ text.active {
   stroke-width: 1.5px;
 }
 
+
 /* Show links as active (dark navy with yellow left border) */
+
 ul.sidebar .sidebar-list a.active {
   color: #fff;
   border-left: 3px solid #e99d1a;
@@ -105,12 +118,12 @@ ul.sidebar .sidebar-list a.active {
 }
 
 #content-wrapper, .page-content {
-  width:100% !important;
-  height:96% !important;
+  width: 100% !important;
+  height: 96% !important;
 }
 
 .img-responsive {
-    margin: 0 auto;
+  margin: 0 auto;
 }
 
 .img-thumbnail {

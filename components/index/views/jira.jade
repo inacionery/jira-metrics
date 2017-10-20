@@ -11,10 +11,10 @@
           .col-md-12
             .table-responsive
               table.table.table-striped.table-bordered.table-hover
-                  tbody
-                    tr(ng-repeat="jira in issues = (unfinishedJiras.issues | orderBy:'fields.updated':true)")
-                      td
-                        issue(jira="jira")
+                tbody
+                  tr(ng-repeat="jira in issues = (unfinishedJiras.issues | orderBy:'fields.updated':true)")
+                    td
+                      issue(jira="jira")
   .col-lg-6.col-md-12
     rd-widget
       rd-widget-header(icon="fa-bar-chart", title="Created Vs Resolved")
@@ -37,7 +37,7 @@
           .col-md-12
             .table-responsive
               table.table.table-striped.table-bordered.table-hover
-                  tbody
-                    tr(ng-repeat="jira in issues = (dailyCreatedJiras.issues | orderBy:'fields.updated':true)")
-                      td
-                        issue(jira="jira")
+                tbody
+                  tr(ng-repeat="jira in issues = (dailyCreatedJiras.issues | orderBy:'fields.updated':true)")
+                    td
+                      issue(jira="jira")

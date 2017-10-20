@@ -1,4 +1,4 @@
-appServices.factory('Statistics', function ($resource, config) {
+appServices.factory('Statistics', function($resource, config) {
 
   function generateStatsFromPeriodWindows(periodWindows) {
     var data = [];
@@ -9,25 +9,24 @@ appServices.factory('Statistics', function ($resource, config) {
       var throughputArray = weeklyThroughput.counts;
       var productivity = calculateProductivity(throughputArray) / people.length;
       var predictability = calculateStdDev(throughputArray) / calculateAverage(throughputArray);
-      var week = moment(periodWindow[periodWindow.length-1].startDate, 'DD/MM/YYYY').add('1', 'week').format('DD/MM/YYYY');
+      var week = moment(periodWindow[periodWindow.length - 1].startDate, 'DD/MM/YYYY').add('1', 'week').format('DD/MM/YYYY');
 
-      data.push(
-        {
-          i: i++,
-          week: week,
-          identifier: "throughput" + week.replace(/\//g, 'gap'),
-          people: people,
-          issueCount: weeklyThroughput.issues[weeklyThroughput.issues.length - 1].length,
-          bugCount: countBugs(weeklyThroughput.issues[weeklyThroughput.issues.length - 1]),
-          magnitudes: weeklyThroughput.magnitudes,
-          throughput: throughputArray,
-          throughputDates: weeklyThroughput.dates,
-          total: ss.sum(throughputArray),
-          average: Math.round(calculateAverage(throughputArray)),
-          stddev: Math.round(calculateStdDev(throughputArray)),
-          productivity: productivity,
-          predictability: predictability
-        });
+      data.push({
+        i: i++,
+        week: week,
+        identifier: "throughput" + week.replace(/\//g, 'gap'),
+        people: people,
+        issueCount: weeklyThroughput.issues[weeklyThroughput.issues.length - 1].length,
+        bugCount: countBugs(weeklyThroughput.issues[weeklyThroughput.issues.length - 1]),
+        magnitudes: weeklyThroughput.magnitudes,
+        throughput: throughputArray,
+        throughputDates: weeklyThroughput.dates,
+        total: ss.sum(throughputArray),
+        average: Math.round(calculateAverage(throughputArray)),
+        stddev: Math.round(calculateStdDev(throughputArray)),
+        productivity: productivity,
+        predictability: predictability
+      });
     });
 
     return data;
@@ -36,7 +35,7 @@ appServices.factory('Statistics', function ($resource, config) {
   function countBugs(issues) {
     var bugCount = 0;
     _.each(issues, function(issue) {
-      if(issue.fields.issuetype.name === 'Bug') {
+      if (issue.fields.issuetype.name === 'Bug') {
         bugCount++;
       }
     });
@@ -81,7 +80,7 @@ appServices.factory('Statistics', function ($resource, config) {
     var startOfBucket = moment(endOfWeek).subtract(numberOfWeeks, 'weeks');
 
     var buckets = [];
-    for(var i = 0; i < numberOfWeeks; i++) {
+    for (var i = 0; i < numberOfWeeks; i++) {
       buckets.push({i: i, startDate: startOfBucket.format('DD/MM/YYYY'), issues: []});
       startOfBucket.add('1', 'week');
     }
@@ -93,8 +92,7 @@ appServices.factory('Statistics', function ($resource, config) {
     _.each(issues, function(issue) {
       var resolutionDate = moment(issue.fields.resolutiondate.substr(0, 10), 'YYYY-MM-DD');
       _.each(weekBuckets, function(bucket) {
-        if(resolutionDate.isAfter(moment(bucket.startDate, 'DD/MM/YYYY')) &&
-          resolutionDate.isBefore(moment(bucket.startDate, 'DD/MM/YYYY').add('1', 'week'))) {
+        if (resolutionDate.isAfter(moment(bucket.startDate, 'DD/MM/YYYY')) && resolutionDate.isBefore(moment(bucket.startDate, 'DD/MM/YYYY').add('1', 'week'))) {
           bucket.issues.push(issue);
         }
       });
@@ -108,8 +106,7 @@ appServices.factory('Statistics', function ($resource, config) {
     _.each(issues, function(issue) {
       var resolutionDate = moment(issue.fields.created.substr(0, 10), 'YYYY-MM-DD');
       _.each(weekBuckets, function(bucket) {
-        if(resolutionDate.isAfter(moment(bucket.startDate, 'DD/MM/YYYY')) &&
-          resolutionDate.isBefore(moment(bucket.startDate, 'DD/MM/YYYY').add('1', 'week'))) {
+        if (resolutionDate.isAfter(moment(bucket.startDate, 'DD/MM/YYYY')) && resolutionDate.isBefore(moment(bucket.startDate, 'DD/MM/YYYY').add('1', 'week'))) {
           bucket.issues.push(issue);
         }
       });
@@ -120,8 +117,8 @@ appServices.factory('Statistics', function ($resource, config) {
 
   function getPeriodWindows(weekBuckets) {
     var windows = [];
-    for (i = 0; i < weekBuckets.length-13; i++) {
-      windows.push(weekBuckets.slice(i, i+13));
+    for (i = 0; i < weekBuckets.length - 13; i++) {
+      windows.push(weekBuckets.slice(i, i + 13));
     }
     return windows;
   }
@@ -131,14 +128,8 @@ appServices.factory('Statistics', function ($resource, config) {
     var people = [];
     _.each(issues, function(issue) {
       let name = issue.fields.assignee.name;
-      if (name == 'inacio.nery'
-        || name == 'adam.brandizzi'
-        || name == 'leonardo.barros'
-        || name == 'marcellus.tavares'
-        || name == 'rafael.praxedes'
-        || name == 'pedro.queiroz'
-        || name == 'lino.alves') {
-          people.push(issue.fields.assignee);
+      if (name == 'inacio.nery' || name == 'adam.brandizzi' || name == 'leonardo.barros' || name == 'marcellus.tavares' || name == 'rafael.praxedes' || name == 'pedro.queiroz' || name == 'lino.alves') {
+        people.push(issue.fields.assignee);
       }
     });
 
@@ -150,15 +141,9 @@ appServices.factory('Statistics', function ($resource, config) {
     _.each(periodWindow, function(periodIssues) {
       _.each(periodIssues.issues, function(issue) {
         let name = issue.fields.assignee.name;
-        if (name == 'inacio.nery'
-          || name == 'adam.brandizzi'
-          || name == 'leonardo.barros'
-          || name == 'marcellus.tavares'
-          || name == 'rafael.praxedes'
-          || name == 'pedro.queiroz'
-          || name == 'lino.alves') {
-            people.push(issue.fields.assignee);
-          }
+        if (name == 'inacio.nery' || name == 'adam.brandizzi' || name == 'leonardo.barros' || name == 'marcellus.tavares' || name == 'rafael.praxedes' || name == 'pedro.queiroz' || name == 'lino.alves') {
+          people.push(issue.fields.assignee);
+        }
       });
     });
 
@@ -166,9 +151,9 @@ appServices.factory('Statistics', function ($resource, config) {
   }
 
   function getUniquePeople(people) {
-    var uniquePeople = _.map(_.groupBy(people,function(person){
+    var uniquePeople = _.map(_.groupBy(people, function(person) {
       return person.name;
-    }),function(grouped){
+    }), function(grouped) {
       return grouped[0];
     });
 
@@ -178,10 +163,10 @@ appServices.factory('Statistics', function ($resource, config) {
   function getWeeklyThroughput(periodWindow) {
 
     var throughput = {
-        magnitudes: [],
-        counts: [],
-        dates : [],
-        issues: []
+      magnitudes: [],
+      counts: [],
+      dates: [],
+      issues: []
     };
 
     _.each(periodWindow, function(week) {
@@ -189,7 +174,7 @@ appServices.factory('Statistics', function ($resource, config) {
       for (i = 0; i < week.issues.length; i++) {
         var issue = week.issues[i];
         var magnitude = issue.fields["customfield_10494"];
-        if(magnitude) {
+        if (magnitude) {
           totalMagnitude += magnitude;
         }
       }
@@ -228,7 +213,7 @@ appServices.factory('Statistics', function ($resource, config) {
     for (var i = 0; i < stats.length; i++) {
       var stat = stats[i];
       var throughput = d3.round(stat.throughput[stat.throughput.length - 1]);
-      var date =  stat.week;
+      var date = stat.week;
       throughputData.push({
         week: date,
         weekNumber: i + 1,
@@ -238,7 +223,7 @@ appServices.factory('Statistics', function ($resource, config) {
 
       var people = d3.round(stat.people.length);
       peopleData.push({
-        week:  date,
+        week: date,
         weekNumber: i + 1,
         type: 'people',
         value: people
@@ -246,7 +231,7 @@ appServices.factory('Statistics', function ($resource, config) {
 
       var totalMagnitude = stat.magnitudes[stat.magnitudes.length - 1];
       magnitudes.push({
-        week:  date,
+        week: date,
         weekNumber: i + 1,
         type: 'points',
         value: totalMagnitude
@@ -254,7 +239,7 @@ appServices.factory('Statistics', function ($resource, config) {
 
       var velocity = totalMagnitude / stat.people.length / 5;
       velocities.push({
-        week:  date,
+        week: date,
         weekNumber: i + 1,
         type: 'points/person/day',
         value: velocity
@@ -277,39 +262,35 @@ appServices.factory('Statistics', function ($resource, config) {
 
     return {
       throughputPeople: [
-            {
-                values: throughputData,
-                key: 'JIRAs Resolved',
-                area: true
-            },
-            {
-                values: peopleData,
-                key: 'People',
-            },
-            {
-                values: magnitudes,
-                key: 'Story Points Completed',
-            },
-          ],
+        {
+          values: throughputData,
+          key: 'JIRAs Resolved',
+          area: true
+        }, {
+          values: peopleData,
+          key: 'People'
+        }, {
+          values: magnitudes,
+          key: 'Story Points Completed'
+        }
+      ],
 
-          predictabilityProductivity: [
-            {
-                values: productivityData,
-                key: 'Productivity',
-                area: true
-            },
-            {
-                values: predictabilityData,
-                key: 'Predictability',
-                area: true
-            },
-            {
-                values: velocities,
-                key: 'Velocity',
-                area: true
-            },
-          ]
-        };
+      predictabilityProductivity: [
+        {
+          values: productivityData,
+          key: 'Productivity',
+          area: true
+        }, {
+          values: predictabilityData,
+          key: 'Predictability',
+          area: true
+        }, {
+          values: velocities,
+          key: 'Velocity',
+          area: true
+        }
+      ]
+    };
   };
 
   function generateCreatedVsResolvedData(createdBuckets, resolvedBuckets) {
@@ -323,7 +304,7 @@ appServices.factory('Statistics', function ($resource, config) {
         var count = previousValue + bucket.issues.length;
         previousValue = count;
 
-        var date =  bucket.startDate;
+        var date = bucket.startDate;
         data.push({
           week: date,
           weekNumber: i++,
@@ -337,38 +318,39 @@ appServices.factory('Statistics', function ($resource, config) {
     _.each(resolvedBuckets, addBucketCountTo(resolvedData));
 
     return [
-            {
-                values: createdData,
-                key: 'Created',
-                color: '#d62728',
-                //area: true
-            },
-            {
-                values: resolvedData,
-                key: 'Resolved',
-                color: '#2ca02c',
-                //area: true
-            },
-          ]
+      {
+        values: createdData,
+        key: 'Created',
+        color: '#d62728',
+        //area: true
+      }, {
+        values: resolvedData,
+        key: 'Resolved',
+        color: '#2ca02c',
+        //area: true
+      }
+    ]
   }
 
   function format(count, one, many) {
-    return (count == 1 ? one : many);
+    return (count == 1
+      ? one
+      : many);
   }
 
   function generateStatsFromBuckets(weeklyBuckets) {
-        var periodWindows = getPeriodWindows(weeklyBuckets);
-        var stats = generateStatsFromPeriodWindows(periodWindows);
+    var periodWindows = getPeriodWindows(weeklyBuckets);
+    var stats = generateStatsFromPeriodWindows(periodWindows);
 
-        return stats;
-      }
+    return stats;
+  }
 
   return {
-      generateResolvedBucketsFromIssues: generateResolvedBucketsFromIssues,
-      generateCreatedBucketsFromIssues: generateCreatedBucketsFromIssues,
-      generateStatsFromBuckets: generateStatsFromBuckets,
-      generateGraphDataFromStat: generateGraphDataFromStat,
-      generateCreatedVsResolvedData: generateCreatedVsResolvedData,
-      getPeopleFromIssues: getPeopleFromIssues,
+    generateResolvedBucketsFromIssues: generateResolvedBucketsFromIssues,
+    generateCreatedBucketsFromIssues: generateCreatedBucketsFromIssues,
+    generateStatsFromBuckets: generateStatsFromBuckets,
+    generateGraphDataFromStat: generateGraphDataFromStat,
+    generateCreatedVsResolvedData: generateCreatedVsResolvedData,
+    getPeopleFromIssues: getPeopleFromIssues
   };
 });
