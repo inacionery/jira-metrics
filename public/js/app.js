@@ -21,9 +21,12 @@ var angularModules = angular.module('myApp', [
 
 var jiraHostName = 'https://issues.liferay.com';
 
+var component = 'component in (subcomponents(LPS, Workflow, \'true\'), subcomponents(LPS, \'Business Productivity\', \'true\'),subcomponents(LPS, Calendar, \'true\'))';
+
 angularModules.value('config', {
   title: 'Metrics Dashboard',
   jiraHostName: jiraHostName,
+  component: component,
   projects: ['"PUBLIC - Liferay Portal Community Edition"'],
   issueTypes: [
     'Bug', '"Regression Bug"', 'Task', 'Story', '"Technical Task"'

@@ -2,6 +2,7 @@ appServices.factory('JIRA', function($resource, config) {
   return {
     throughputData: $resource('api/throughputData', {
       jiraHostName: config.jiraHostName,
+      component: config.component,
       'projects[]': config.projects,
       'completionTypes[]': config.completionTypes,
       issueTypes: config.issueTypes
@@ -14,9 +15,10 @@ appServices.factory('JIRA', function($resource, config) {
 
     dailyCreated: $resource('api/search', {
       jiraHostName: config.jiraHostName,
+      component: config.component,
       'projects[]': config.projects,
       issueTypes: config.issueTypes,
-      search: 'created >= "-1d 1h" AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))'
+      search: 'created >= "-1d 1h"'
     }, {
       get: {
         method: 'GET',
@@ -26,9 +28,10 @@ appServices.factory('JIRA', function($resource, config) {
 
     created: $resource('api/searchSimple', {
       jiraHostName: config.jiraHostName,
+      component: config.component,
       'projects[]': config.projects,
       issueTypes: config.issueTypes,
-      search: 'created >= endOfWeek(-23) AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))'
+      search: 'created >= endOfWeek(-23)'
     }, {
       get: {
         method: 'GET',
@@ -38,9 +41,10 @@ appServices.factory('JIRA', function($resource, config) {
 
     resolved: $resource('api/searchSimple', {
       jiraHostName: config.jiraHostName,
+      component: config.component,
       'projects[]': config.projects,
       issueTypes: config.issueTypes,
-      search: 'resolutiondate >= endOfWeek(-23) AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))'
+      search: 'resolutiondate >= endOfWeek(-23)'
     }, {
       get: {
         method: 'GET',
@@ -50,8 +54,8 @@ appServices.factory('JIRA', function($resource, config) {
 
     unfinishedJIRAs: $resource('api/unfinished', {
       jiraHostName: config.jiraHostName,
-      'projects[]': config.projects,
-      search: 'component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))'
+      component: config.component,
+      'projects[]': config.projects
     }, {
       get: {
         method: 'GET',

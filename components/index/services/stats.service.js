@@ -127,9 +127,11 @@ appServices.factory('Statistics', function($resource, config) {
 
     var people = [];
     _.each(issues, function(issue) {
-      let name = issue.fields.assignee.name;
-      if (name == 'inacio.nery' || name == 'adam.brandizzi' || name == 'leonardo.barros' || name == 'marcellus.tavares' || name == 'rafael.praxedes' || name == 'pedro.queiroz' || name == 'lino.alves') {
-        people.push(issue.fields.assignee);
+      if (issue.fields.assignee) {
+        let name = issue.fields.assignee.name;
+        if (name == 'inacio.nery' || name == 'adam.brandizzi' || name == 'leonardo.barros' || name == 'marcellus.tavares' || name == 'rafael.praxedes' || name == 'pedro.queiroz' || name == 'lino.alves' || name == 'adriano.interaminense' || name == 'aline.cantarelli' || name == 'clovis.neto' || name == 'marcela.cunha') {
+          people.push(issue.fields.assignee);
+        }
       }
     });
 
@@ -140,9 +142,11 @@ appServices.factory('Statistics', function($resource, config) {
     var people = [];
     _.each(periodWindow, function(periodIssues) {
       _.each(periodIssues.issues, function(issue) {
-        let name = issue.fields.assignee.name;
-        if (name == 'inacio.nery' || name == 'adam.brandizzi' || name == 'leonardo.barros' || name == 'marcellus.tavares' || name == 'rafael.praxedes' || name == 'pedro.queiroz' || name == 'lino.alves') {
-          people.push(issue.fields.assignee);
+        if (issue.fields.assignee) {
+          let name = issue.fields.assignee.name;
+          if (name == 'inacio.nery' || name == 'adam.brandizzi' || name == 'leonardo.barros' || name == 'marcellus.tavares' || name == 'rafael.praxedes' || name == 'pedro.queiroz' || name == 'lino.alves' || name == 'adriano.interaminense' || name == 'aline.cantarelli' || name == 'clovis.neto' || name == 'marcela.cunha') {
+            people.push(issue.fields.assignee);
+          }
         }
       });
     });

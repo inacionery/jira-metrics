@@ -56,11 +56,12 @@ function jiraPostRequest(res, jiraUrl, data, cacheTimeout) {
 exports.throughputData = function(req, res) {
 
   var hostname = req.query.jiraHostName;
+  var component = req.query.component;
   var projects = req.query.projects;
   var issueTypes = req.query.issueTypes;
   var completionTypes = req.query.completionTypes;
 
-  var query = "project in (" + projects.join(',') + ") AND issuetype in (" + issueTypes.join(',') + ") AND resolution in (" + completionTypes.join(',') + ") AND resolutiondate > endOfWeek(-23) AND component in (subcomponents(LPS, Workflow, 'true'), subcomponents(LPS, 'Business Productivity', 'true'),subcomponents(LPS, Calendar, 'true'))";
+  var query = "project in (" + projects.join(',') + ") AND issuetype in (" + issueTypes.join(',') + ") AND resolution in (" + completionTypes.join(',') + ") AND resolutiondate > endOfWeek(-23) AND " + component;
 
   var data = {
     "jql": query,
@@ -81,11 +82,12 @@ exports.throughputData = function(req, res) {
 exports.allIssuesPerWeek = function(req, res) {
 
   var hostname = req.query.jiraHostName;
+  var component = req.query.component;
   var projects = req.query.projects;
   var issueTypes = req.query.issueTypes;
   var weekNumber = req.query.weekNumber;
 
-  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND status was in (Open) on endOfWeek(-' + weekNumber + ') AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))';
+  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND status was in (Open) on endOfWeek(-' + weekNumber + ') AND ' + component;
 
   var data = {
     "jql": query,
@@ -101,11 +103,12 @@ exports.allIssuesPerWeek = function(req, res) {
 exports.search = function(req, res) {
 
   var hostname = req.query.jiraHostName;
+  var component = req.query.component;
   var projects = req.query.projects;
   var issueTypes = req.query.issueTypes;
   var search = req.query.search;
 
-  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND (' + search + ') AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))';
+  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND (' + search + ') AND ' + component;
 
   var data = {
     "jql": query,
@@ -118,11 +121,12 @@ exports.search = function(req, res) {
 exports.searchSimple = function(req, res) {
 
   var hostname = req.query.jiraHostName;
+  var component = req.query.component;
   var projects = req.query.projects;
   var issueTypes = req.query.issueTypes;
   var search = req.query.search;
 
-  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND (' + search + ') AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))';
+  var query = 'project in (' + projects.join(",") + ') AND issuetype in (' + issueTypes.join(",") + ') AND (' + search + ') AND ' + component;
 
   var data = {
     "jql": query,
@@ -138,11 +142,12 @@ exports.searchSimple = function(req, res) {
 exports.unfinished = function(req, res) {
 
   var hostname = req.query.jiraHostName;
+  var component = req.query.component;
   var projects = req.query.projects;
   var issueTypes = req.query.issueTypes;
   var search = req.query.search;
 
-  var query = 'resolution = Unresolved AND component in (subcomponents(LPS, Workflow, "true"), subcomponents(LPS, "Business Productivity", "true"),subcomponents(LPS, Calendar, "true"))';
+  var query = 'resolution = Unresolved AND ' + component;
 
   var data = {
     "jql": query,
