@@ -71,7 +71,7 @@ exports.throughputData = function(req, res) {
       "assignee",
       "created",
       "resolutiondate",
-      "Participants of an Issue"
+      "customfield_10193"
     ],
     "maxResults": 250
   };

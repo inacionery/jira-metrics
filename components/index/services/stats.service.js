@@ -177,7 +177,7 @@ appServices.factory('Statistics', function($resource, config) {
       var totalMagnitude = 0;
       for (i = 0; i < week.issues.length; i++) {
         var issue = week.issues[i];
-        var magnitude = issue.fields["customfield_10494"];
+        var magnitude = issue.fields["customfield_10193"];
         if (magnitude) {
           totalMagnitude += magnitude;
         }
