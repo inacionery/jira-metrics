@@ -21,7 +21,7 @@ var angularModules = angular.module('myApp', [
 
 var jiraHostName = 'https://issues.liferay.com';
 
-var component = 'component in (subcomponents(LPS, Workflow, \'true\'), subcomponents(LPS, \'Business Productivity\', \'true\'),subcomponents(LPS, Calendar, \'true\'))';
+var component = 'component in (Forms, subcomponents(LPS, Forms, \'true\'), \'Dynamic Data Lists\', subcomponents(LPS, \'Dynamic Data Lists\', \'true\'), \'Web Form\', subcomponents(LPS, \'Web Form\', \'true\'), \'Dynamic Data Mapping\', subcomponents(LPS, \'Dynamic Data Mapping\', \'true\'), Polls)';
 var people = [
   'inacio.nery',
   'adam.brandizzi',
