@@ -45,11 +45,12 @@ angularModules.constant('routes', [
     name: 'Metrics',
     url: 'metrics',
     icon: 'fa-bar-chart'
-  }, {
-    name: 'JIRA',
-    url: 'jira',
-    icon: 'fa-child'
   }
+  // , {
+  //   name: 'JIRA',
+  //   url: 'jira',
+  //   icon: 'fa-child'
+  // }
 ]);
 
 angularModules.config(function($stateProvider, $urlRouterProvider, $locationProvider) {

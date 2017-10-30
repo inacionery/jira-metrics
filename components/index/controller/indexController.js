@@ -78,8 +78,6 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
       // Build created vs resolved chart here
       var created = $scope.createdJiras.issues;
       var resolved = $scope.resolvedJiras.issues;
-      //console.log('Created: ' + created.length);
-      //console.log('Resolved: ' + resolved.length);
 
       var createdBuckets = Statistics.generateCreatedBucketsFromIssues(created);
       var resolvedBuckets = Statistics.generateResolvedBucketsFromIssues(resolved);
@@ -106,7 +104,7 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
   buildCreatedVsResolved();
 
   runAndSchedule(function() {
-    $scope.unfinishedJiras = JIRA.unfinishedJIRAs.get();
+    //$scope.unfinishedJiras = JIRA.unfinishedJIRAs.get();
   });
 
   $scope.performanceLoaded = function() {
@@ -189,9 +187,7 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
 
   $scope.chartStoryOptions = {
     chart: {
-      type: $scope.isBarchart
-        ? 'lineChart'
-        : 'multiBarChart',
+      type: 'stackedAreaChart',
       height: 450,
       transitionDuration: 500,
       x: function(d) {
@@ -204,7 +200,7 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
       xAxis: {
         axisLabel: 'Week',
         tickFormat: function(d) {
-          return $scope.stats[d - 1].week;
+          return $scope.stats[d - 1] ? $scope.stats[d - 1].week : '';
         }
       },
       tooltipContent: function(key, x, y, e, graph) {

@@ -32,7 +32,78 @@ appServices.factory('Statistics', function($resource, config) {
     return data;
   }
 
+  function getDateMap() {
+    let date = moment("02/01/2010", 'DD/MM/YYYY');
+    let now = new Date();
+    let dateMap = new Map();
+    while (date.isBefore(now)) {
+      dateMap.set(date.format('DD/MM/YYYY'), {
+        issues: new Map(),
+        open: 0,
+        development: 0,
+        review: 0,
+        pm: 0,
+        qa: 0,
+        closed: 0
+      });
+      date = moment(date, 'DD/MM/YYYY').add('1', 'week');
+    }
+    return dateMap;
+  }
+
+  function getDateFromMap(date, dateMap) {
+    date = moment(date.toISOString().slice(0, 10), 'YYYY-MM-DD').format('DD/MM/YYYY');
+    if (!dateMap) debugger;
+    while (!dateMap.get(date)) {
+      date = moment(date, 'DD/MM/YYYY').add('1', 'day').format('DD/MM/YYYY');
+    }
+    return date;
+  }
+
+  function populateTransitions(issues, dateMap) {
+    _.each(issues, function(issue) {
+      _.each(issue.transitions, function(transition) {
+        let date = getDateFromMap(transition.fromTime, dateMap);
+        let startDate = moment(date, 'DD/MM/YYYY');
+        let endDate = moment(transition.toTime.toISOString().slice(0, 10), 'YYYY-MM-DD');
+        while (startDate.isBefore(endDate)) {
+          let transtions = dateMap.get(startDate.format('DD/MM/YYYY'));
+          if (transtions.issues.get(issue.key)) {
+            break;
+          }
+          transtions.issues.set(issue.key, true);
+          if (transition.from == "Open" || transition.from == "Selected for Development" || transition.from == "Backlog" || transition.from == "Ready for Development" || transition.from == "Reopened" || transition.from == "Awaiting Manager Approval") {
+            transtions.open += 1;
+          } else if (transition.from == "In Development" || transition.from == "In Progress") {
+            transtions.development += 1;
+          } else if (transition.from == "In Review") {
+            transtions.review += 1;
+          } else if (transition.from == "Awaiting PM Review" || transition.from == "In PM Review") {
+            transtions.pm += 1;
+          } else if (transition.from == "Ready for QA") {
+            transtions.qa += 1;
+          } else if (transition.from == "Closed") {
+            transtions.closed += 1;
+          } else {
+            console.error("Untreated transition: " + transition.from);
+          }
+          dateMap.set(startDate.format('DD/MM/YYYY'), transtions);
+
+          startDate = startDate.add('1', 'week');
+        }
+      });
+    });
+    return dateMap;
+  }
+
   function generateStoryStatsFromPeriodWindows(periodWindows) {
+    var dateMap = getDateMap();
+    _.each(periodWindows, function(periodWindow) {
+      _.each(periodWindow, function(week) {
+        dateMap = populateTransitions(week.issues, dateMap);
+      });
+    });
+
     var data = [];
     var i = 0;
     _.each(periodWindows, function(periodWindow) {
@@ -40,6 +111,7 @@ appServices.factory('Statistics', function($resource, config) {
       var weeklyThroughput = getWeeklyThroughput(periodWindow);
       var throughputArray = weeklyThroughput.counts;
       var week = moment(periodWindow[periodWindow.length - 1].startDate, 'DD/MM/YYYY').add('1', 'week').format('DD/MM/YYYY');
+
       data.push({
         i: i++,
         week: week,
@@ -49,7 +121,7 @@ appServices.factory('Statistics', function($resource, config) {
         bugCount: countBugs(weeklyThroughput.issues[weeklyThroughput.issues.length - 1]),
         throughput: throughputArray,
         throughputDates: weeklyThroughput.dates,
-        transitions: getTransitionsDuration(weeklyThroughput.issues[weeklyThroughput.issues.length - 1]),
+        transitions: dateMap.get(week),
         total: ss.sum(throughputArray),
         average: Math.round(calculateAverage(throughputArray)),
         stddev: Math.round(calculateStdDev(throughputArray))
@@ -60,7 +132,6 @@ appServices.factory('Statistics', function($resource, config) {
   }
 
   function getTransitionsDuration(issues) {
-
     let duration = {
       open: [],
       development: [],
@@ -77,9 +148,9 @@ appServices.factory('Statistics', function($resource, config) {
     let count = 0;
     _.each(issues, function(issue) {
       _.each(issue.transitions, function(transition) {
-        if (transition.from == "Open" || transition.from == "Selected for Development" || transition.from == "Backlog" || transition.from == "Ready for Development" || transition.from == "Reopened") {
+        if (transition.from == "Open" || transition.from == "Selected for Development" || transition.from == "Backlog" || transition.from == "Ready for Development" || transition.from == "Reopened" || transition.from == "Awaiting Manager Approval") {
           openDuration += transition.duration;
-        } else if (transition.from == "In Development") {
+        } else if (transition.from == "In Development" || transition.from == "In Progress") {
           developmentDuration += transition.duration;
         } else if (transition.from == "In Review") {
           reviewDuration += transition.duration;
@@ -183,14 +254,24 @@ appServices.factory('Statistics', function($resource, config) {
                 if (item.field == 'status') {
                   let toTime = new Date(history.created);
                   issue.transitions.push({
-                    'duration': parseInt((toTime - fromTime) / 1000 / 60 / 60 / 24),
                     'from': item.fromString,
-                    'to': item.toString
+                    'to': item.toString,
+                    'fromTime': fromTime,
+                    'toTime': toTime
                   });
                   fromTime = toTime;
                 }
               }
             }
+
+            let latest = issue.transitions[issue.transitions.length - 1];
+            issue.transitions.push({
+              'from': "Closed",
+              'to': "Closed",
+              'fromTime': latest.toTime,
+              'toTime': new Date()
+            });
+
             bucket.issues.push(issue);
           }
         });
@@ -423,6 +504,7 @@ appServices.factory('Statistics', function($resource, config) {
     var reviewDuration = [];
     var pmDuration = [];
     var qaDuration = [];
+    var closeDuration = [];
 
     for (var i = 0; i < stats.length; i++) {
       var stat = stats[i];
@@ -463,29 +545,45 @@ appServices.factory('Statistics', function($resource, config) {
         type: 'days',
         value: d3.round(stat.transitions.qa)
       });
+
+      closeDuration.push({
+        issues: stat.issueCount,
+        weekNumber: i + 1,
+        type: 'days',
+        value: d3.round(stat.transitions.closed)
+      });
     };
 
     return {
       resolvedStories: [
         {
-          values: openDuration,
-          key: 'Open',
+          values: closeDuration,
+          key: 'Closed',
           area: true
-        }, {
-          values: developmentDuration,
-          key: 'In Development',
+        },
+        {
+          values: qaDuration,
+          key: 'In QA',
           area: true
-        }, {
-          values: reviewDuration,
-          key: 'In Review',
-          area: true
-        }, {
+        },
+        {
           values: pmDuration,
           key: 'In PM',
           area: true
-        }, {
-          values: qaDuration,
-          key: 'In QA',
+        },
+        {
+          values: reviewDuration,
+          key: 'In Review',
+          area: true
+        },
+        {
+          values: developmentDuration,
+          key: 'In Development',
+          area: true
+        },
+        {
+          values: openDuration,
+          key: 'Open',
           area: true
         }
       ]
