@@ -32,6 +32,85 @@ appServices.factory('Statistics', function($resource, config) {
     return data;
   }
 
+  function generateStoryStatsFromPeriodWindows(periodWindows) {
+    var data = [];
+    var i = 0;
+    _.each(periodWindows, function(periodWindow) {
+      var people = getPeopleFromWindow(periodWindow);
+      var weeklyThroughput = getWeeklyThroughput(periodWindow);
+      var throughputArray = weeklyThroughput.counts;
+      var week = moment(periodWindow[periodWindow.length - 1].startDate, 'DD/MM/YYYY').add('1', 'week').format('DD/MM/YYYY');
+      data.push({
+        i: i++,
+        week: week,
+        identifier: "throughput" + week.replace(/\//g, 'gap'),
+        people: people,
+        issueCount: weeklyThroughput.issues[weeklyThroughput.issues.length - 1].length,
+        bugCount: countBugs(weeklyThroughput.issues[weeklyThroughput.issues.length - 1]),
+        throughput: throughputArray,
+        throughputDates: weeklyThroughput.dates,
+        transitions: getTransitionsDuration(weeklyThroughput.issues[weeklyThroughput.issues.length - 1]),
+        total: ss.sum(throughputArray),
+        average: Math.round(calculateAverage(throughputArray)),
+        stddev: Math.round(calculateStdDev(throughputArray))
+      });
+    });
+
+    return data;
+  }
+
+  function getTransitionsDuration(issues) {
+
+    let duration = {
+      open: [],
+      development: [],
+      review: [],
+      pm: [],
+      qa: []
+    };
+
+    let openDuration = 0;
+    let developmentDuration = 0;
+    let reviewDuration = 0;
+    let pmDuration = 0;
+    let qaDuration = 0;
+    let count = 0;
+    _.each(issues, function(issue) {
+      _.each(issue.transitions, function(transition) {
+        if (transition.from == "Open" || transition.from == "Selected for Development" || transition.from == "Backlog" || transition.from == "Ready for Development" || transition.from == "Reopened") {
+          openDuration += transition.duration;
+        } else if (transition.from == "In Development") {
+          developmentDuration += transition.duration;
+        } else if (transition.from == "In Review") {
+          reviewDuration += transition.duration;
+        } else if (transition.from == "Awaiting PM Review" || transition.from == "In PM Review") {
+          pmDuration += transition.duration;
+        } else if (transition.from == "Ready for QA") {
+          qaDuration += transition.duration;
+        } else if (transition.from == "Closed") {} else {
+          console.error("Untreated transition: " + transition.from);
+        }
+        count++;
+      });
+    });
+    duration.open.push(openDuration > 0
+      ? openDuration / count
+      : 0);
+    duration.development.push(developmentDuration > 0
+      ? developmentDuration / count
+      : 0);
+    duration.review.push(reviewDuration > 0
+      ? reviewDuration / count
+      : 0);
+    duration.pm.push(pmDuration > 0
+      ? pmDuration / count
+      : 0);
+    duration.qa.push(qaDuration > 0
+      ? qaDuration / count
+      : 0);
+    return duration;
+  }
+
   function countBugs(issues) {
     var bugCount = 0;
     _.each(issues, function(issue) {
@@ -87,6 +166,40 @@ appServices.factory('Statistics', function($resource, config) {
     return buckets;
   }
 
+  function generateResolvedStoryBucketsFromIssues(issues) {
+    var weekBuckets = createWeekBuckets();
+    _.each(issues, function(issue) {
+      if (issue.fields.issuetype.name === 'Story') {
+        issue.transitions = [];
+        var resolutionDate = moment(issue.fields.resolutiondate.substr(0, 10), 'YYYY-MM-DD');
+        _.each(weekBuckets, function(bucket) {
+          if (resolutionDate.isAfter(moment(bucket.startDate, 'DD/MM/YYYY')) && resolutionDate.isBefore(moment(bucket.startDate, 'DD/MM/YYYY').add('1', 'week'))) {
+            let fromTime = new Date(issue.fields.created);
+            let histories = issue.changelog.histories;
+            for (var i = 0; i < histories.length; i++) {
+              let history = histories[i];
+              for (var k = 0; k < history.items.length; k++) {
+                let item = history.items[k];
+                if (item.field == 'status') {
+                  let toTime = new Date(history.created);
+                  issue.transitions.push({
+                    'duration': parseInt((toTime - fromTime) / 1000 / 60 / 60 / 24),
+                    'from': item.fromString,
+                    'to': item.toString
+                  });
+                  fromTime = toTime;
+                }
+              }
+            }
+            bucket.issues.push(issue);
+          }
+        });
+      }
+    });
+
+    return weekBuckets;
+  }
+
   function generateResolvedBucketsFromIssues(issues) {
     var weekBuckets = createWeekBuckets();
     _.each(issues, function(issue) {
@@ -127,10 +240,13 @@ appServices.factory('Statistics', function($resource, config) {
 
     var people = [];
     _.each(issues, function(issue) {
-      if (issue.fields.assignee) {
-        let name = issue.fields.assignee.name;
-        if (name == 'inacio.nery' || name == 'adam.brandizzi' || name == 'leonardo.barros' || name == 'marcellus.tavares' || name == 'rafael.praxedes' || name == 'pedro.queiroz' || name == 'lino.alves' || name == 'adriano.interaminense' || name == 'aline.cantarelli' || name == 'clovis.neto' || name == 'marcela.cunha') {
-          people.push(issue.fields.assignee);
+      let names = issue.fields["customfield_12020"];
+      if (names) {
+        for (var i = 0, len = names.length; i < len; i++) {
+          name = names[i].split('(')[0];
+          if (config.people.indexOf(name) > -1) {
+            people.push(name);
+          }
         }
       }
     });
@@ -142,10 +258,13 @@ appServices.factory('Statistics', function($resource, config) {
     var people = [];
     _.each(periodWindow, function(periodIssues) {
       _.each(periodIssues.issues, function(issue) {
-        if (issue.fields.assignee) {
-          let name = issue.fields.assignee.name;
-          if (name == 'inacio.nery' || name == 'adam.brandizzi' || name == 'leonardo.barros' || name == 'marcellus.tavares' || name == 'rafael.praxedes' || name == 'pedro.queiroz' || name == 'lino.alves' || name == 'adriano.interaminense' || name == 'aline.cantarelli' || name == 'clovis.neto' || name == 'marcela.cunha') {
-            people.push(issue.fields.assignee);
+        let names = issue.fields["customfield_12020"];
+        if (names) {
+          for (var i = 0, len = names.length; i < len; i++) {
+            name = names[i].split('(')[0];
+            if (config.people.indexOf(name) > -1) {
+              people.push(name);
+            }
           }
         }
       });
@@ -156,7 +275,7 @@ appServices.factory('Statistics', function($resource, config) {
 
   function getUniquePeople(people) {
     var uniquePeople = _.map(_.groupBy(people, function(person) {
-      return person.name;
+      return person;
     }), function(grouped) {
       return grouped[0];
     });
@@ -297,6 +416,82 @@ appServices.factory('Statistics', function($resource, config) {
     };
   };
 
+  function generateGraphStoryDataFromStat(stats) {
+    var resolvedStories = [];
+    var openDuration = [];
+    var developmentDuration = [];
+    var reviewDuration = [];
+    var pmDuration = [];
+    var qaDuration = [];
+
+    for (var i = 0; i < stats.length; i++) {
+      var stat = stats[i];
+      var throughput = d3.round(stat.throughput[stat.throughput.length - 1]);
+      var date = stat.week;
+
+      openDuration.push({
+        issues: stat.issueCount,
+        weekNumber: i + 1,
+        type: 'days',
+        value: d3.round(stat.transitions.open)
+      });
+
+      developmentDuration.push({
+        issues: stat.issueCount,
+        weekNumber: i + 1,
+        type: 'days',
+        value: d3.round(stat.transitions.development)
+      });
+
+      reviewDuration.push({
+        issues: stat.issueCount,
+        weekNumber: i + 1,
+        type: 'days',
+        value: d3.round(stat.transitions.review)
+      });
+
+      pmDuration.push({
+        issues: stat.issueCount,
+        weekNumber: i + 1,
+        type: 'days',
+        value: d3.round(stat.transitions.pm)
+      });
+
+      qaDuration.push({
+        issues: stat.issueCount,
+        weekNumber: i + 1,
+        type: 'days',
+        value: d3.round(stat.transitions.qa)
+      });
+    };
+
+    return {
+      resolvedStories: [
+        {
+          values: openDuration,
+          key: 'Open',
+          area: true
+        }, {
+          values: developmentDuration,
+          key: 'In Development',
+          area: true
+        }, {
+          values: reviewDuration,
+          key: 'In Review',
+          area: true
+        }, {
+          values: pmDuration,
+          key: 'In PM',
+          area: true
+        }, {
+          values: qaDuration,
+          key: 'In QA',
+          area: true
+        }
+      ]
+    };
+  };
+
   function generateCreatedVsResolvedData(createdBuckets, resolvedBuckets) {
     var createdData = [];
     var resolvedData = [];
@@ -349,7 +544,17 @@ appServices.factory('Statistics', function($resource, config) {
     return stats;
   }
 
+  function generateStoryStatsFromBuckets(weeklyBuckets) {
+    var periodWindows = getPeriodWindows(weeklyBuckets);
+    var stats = generateStoryStatsFromPeriodWindows(periodWindows);
+
+    return stats;
+  }
+
   return {
+    generateResolvedStoryBucketsFromIssues: generateResolvedStoryBucketsFromIssues,
+    generateStoryStatsFromBuckets: generateStoryStatsFromBuckets,
+    generateGraphStoryDataFromStat: generateGraphStoryDataFromStat,
     generateResolvedBucketsFromIssues: generateResolvedBucketsFromIssues,
     generateCreatedBucketsFromIssues: generateCreatedBucketsFromIssues,
     generateStatsFromBuckets: generateStatsFromBuckets,

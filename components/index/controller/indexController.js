@@ -70,26 +70,6 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
     });
   };
 
-  $scope.buildResultStatusClass = function(build) {
-    var status = build.data.result;
-    var statusClass;
-    if (!build.data.building) {
-      if (status === 'SUCCESS') {
-        statusClass = 'label-success';
-      } else if (status === 'FAILURE') {
-        statusClass = 'label-danger';
-      } else if (status === 'UNSTABLE') {
-        statusClass = 'label-warning';
-      } else {
-        statusClass = 'label-info';
-      }
-    } else {
-      statusClass = 'label-primary';
-    }
-
-    return statusClass;
-  }
-
   function buildCreatedVsResolved() {
     $scope.createdJiras = JIRA.created.get();
     $scope.resolvedJiras = JIRA.resolved.get();
@@ -98,8 +78,8 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
       // Build created vs resolved chart here
       var created = $scope.createdJiras.issues;
       var resolved = $scope.resolvedJiras.issues;
-      console.log('Created: ' + created.length);
-      console.log('Resolved: ' + resolved.length);
+      //console.log('Created: ' + created.length);
+      //console.log('Resolved: ' + resolved.length);
 
       var createdBuckets = Statistics.generateCreatedBucketsFromIssues(created);
       var resolvedBuckets = Statistics.generateResolvedBucketsFromIssues(resolved);
@@ -114,6 +94,9 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
   runAndSchedule(function() {
     JIRA.throughputData.get(function(jiras) {
       $scope.people = Statistics.getPeopleFromIssues(jiras.issues);
+      $scope.storyBuckets = Statistics.generateResolvedStoryBucketsFromIssues(jiras.issues);
+      $scope.storyStats = Statistics.generateStoryStatsFromBuckets($scope.storyBuckets);
+      $scope.graphStoryData = Statistics.generateGraphStoryDataFromStat($scope.storyStats);
       $scope.weeklyBuckets = Statistics.generateResolvedBucketsFromIssues(jiras.issues);
       $scope.stats = Statistics.generateStatsFromBuckets($scope.weeklyBuckets);
       $scope.graphData = Statistics.generateGraphDataFromStat($scope.stats);
@@ -200,6 +183,34 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
         return '<h3>' + key + '</h3>' + '<p>' + ($scope.isInt(y)
           ? d3.round(y)
           : y) + ' ' + e.point.type + ' for Week ' + e.point.week + '</p>'
+      }
+    }
+  };
+
+  $scope.chartStoryOptions = {
+    chart: {
+      type: $scope.isBarchart
+        ? 'lineChart'
+        : 'multiBarChart',
+      height: 450,
+      transitionDuration: 500,
+      x: function(d) {
+        return d.weekNumber;
+      },
+      y: function(d) {
+        return d.value;
+      },
+      useInteractiveGuideline: true,
+      xAxis: {
+        axisLabel: 'Week',
+        tickFormat: function(d) {
+          return $scope.stats[d - 1].week;
+        }
+      },
+      tooltipContent: function(key, x, y, e, graph) {
+        return '<h3>' + key + '</h3>' + '<p>' + ($scope.isInt(y)
+          ? d3.round(y)
+          : y) + ' ' + e.point.type + ' in average for ' + e.point.issues + ' issues</p>'
       }
     }
   };

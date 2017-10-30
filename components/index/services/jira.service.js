@@ -54,8 +54,7 @@ appServices.factory('JIRA', function($resource, config) {
 
     unfinishedJIRAs: $resource('api/unfinished', {
       jiraHostName: config.jiraHostName,
-      component: config.component,
-      'projects[]': config.projects
+      component: config.component
     }, {
       get: {
         method: 'GET',

@@ -1,10 +1,14 @@
 .row
-  .col-md-12
+  .col-lg-12.col-md-12
     rd-widget
-      rd-widget-header(icon="fa-group", title="Who's in this Week?")
-        a(href="#") {{people.length}} People
-      rd-widget-body.large.no-padding(loading="{{!people}}")
-        img.img-thumbnail(ng-repeat="person in people", ng-src="{{person.avatarUrls['48x48']}}", title="{{person.displayName}}")
+      rd-widget-header(icon="fa-bar-chart", title="Stories Resolved")
+        a(ng-click="toggleFullScreen(chartStoryOptions)", title="Expand to Fullscreen")
+          i.fa.fa-expand
+      rd-widget-body.medium.no-padding(loading="{{!graphStoryData.resolvedStories}}")
+        .full(id="throughput", fullscreen="chartStoryOptions.fullscreen", only-watched-property)
+          h3.center(ng-hide="!chartStoryOptions.fullscreen") Stories Resolved
+          .full(style="height: 95%")
+            nvd3(options='chartStoryOptions', data='graphStoryData.resolvedStories')
 .row
   .col-lg-6.col-md-12
     rd-widget
@@ -40,7 +44,6 @@
                 th Total/Average/Std Dev
                 th Productivity
                 th Predictability
-                th Show People
                 th Issue Count
                 th Bug Count
               tbody
@@ -52,14 +55,6 @@
                   td {{ stat.total }} / {{ stat.average}} / {{ stat.stddev }}
                   td {{ stat.productivity }}
                   td {{ stat.predictability }}
-                  td
-                    .col-md-2
-                      button.btn.btn-default.btn-small(ng-click="isCollapsed = !isCollapsed") People
-                    .col-md-10(ng-show="isCollapsed")
-                      br
-                      br
-                      h5 {{stat.people.length}} People
-                      img.img-thumbnail(ng-repeat="person in stat.people", ng-src="{{person.avatarUrls['48x48']}}", title="{{person.displayName}}")
                   td {{ stat.issueCount }}
                   td {{ stat.bugCount }}
 

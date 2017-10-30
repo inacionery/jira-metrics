@@ -71,8 +71,10 @@ exports.throughputData = function(req, res) {
       "assignee",
       "created",
       "resolutiondate",
-      "customfield_10193"
+      "customfield_10193",
+      "customfield_12020"
     ],
+    "expand": ["changelog"],
     "maxResults": 250
   };
 
@@ -143,9 +145,6 @@ exports.unfinished = function(req, res) {
 
   var hostname = req.query.jiraHostName;
   var component = req.query.component;
-  var projects = req.query.projects;
-  var issueTypes = req.query.issueTypes;
-  var search = req.query.search;
 
   var query = 'resolution = Unresolved AND ' + component;
 
