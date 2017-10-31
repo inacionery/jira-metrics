@@ -1,5 +1,7 @@
 appServices.factory('Statistics', function($resource, config) {
 
+  var _dataMap = null;
+
   function generateStatsFromPeriodWindows(periodWindows) {
     var data = [];
     var i = 0;
@@ -33,11 +35,14 @@ appServices.factory('Statistics', function($resource, config) {
   }
 
   function getDateMap() {
-    let date = moment("02/01/2010", 'DD/MM/YYYY');
-    let now = new Date();
-    let dateMap = new Map();
+    if (_dataMap) {
+      return _dataMap;
+    }
+    let date = moment("02/01/2016", 'DD/MM/YYYY');
+    let now = moment(new Date()).add('1', 'week');
+    _dataMap = new Map();
     while (date.isBefore(now)) {
-      dateMap.set(date.format('DD/MM/YYYY'), {
+      _dataMap.set(date.format('DD/MM/YYYY'), {
         issues: new Map(),
         open: 0,
         development: 0,
@@ -48,138 +53,95 @@ appServices.factory('Statistics', function($resource, config) {
       });
       date = moment(date, 'DD/MM/YYYY').add('1', 'week');
     }
-    return dateMap;
+    return _dataMap;
   }
 
-  function getDateFromMap(date, dateMap) {
-    date = moment(date.toISOString().slice(0, 10), 'YYYY-MM-DD').format('DD/MM/YYYY');
-    if (!dateMap) debugger;
-    while (!dateMap.get(date)) {
-      date = moment(date, 'DD/MM/YYYY').add('1', 'day').format('DD/MM/YYYY');
+  function getDateFromMap(date) {
+    var map = getDateMap();
+    while (!map.get(date.format('DD/MM/YYYY'))) {
+      date = date.add('1', 'day');
     }
-    return date;
-  }
 
-  function populateTransitions(issues, dateMap) {
-    _.each(issues, function(issue) {
-      _.each(issue.transitions, function(transition) {
-        let date = getDateFromMap(transition.fromTime, dateMap);
-        let startDate = moment(date, 'DD/MM/YYYY');
-        let endDate = moment(transition.toTime.toISOString().slice(0, 10), 'YYYY-MM-DD');
-        while (startDate.isBefore(endDate)) {
-          let transtions = dateMap.get(startDate.format('DD/MM/YYYY'));
-          if (transtions.issues.get(issue.key)) {
-            break;
-          }
-          transtions.issues.set(issue.key, true);
-          if (transition.from == "Open" || transition.from == "Selected for Development" || transition.from == "Backlog" || transition.from == "Ready for Development" || transition.from == "Reopened" || transition.from == "Awaiting Manager Approval") {
-            transtions.open += 1;
-          } else if (transition.from == "In Development" || transition.from == "In Progress") {
-            transtions.development += 1;
-          } else if (transition.from == "In Review") {
-            transtions.review += 1;
-          } else if (transition.from == "Awaiting PM Review" || transition.from == "In PM Review") {
-            transtions.pm += 1;
-          } else if (transition.from == "Ready for QA") {
-            transtions.qa += 1;
-          } else if (transition.from == "Closed") {
-            transtions.closed += 1;
-          } else {
-            console.error("Untreated transition: " + transition.from);
-          }
-          dateMap.set(startDate.format('DD/MM/YYYY'), transtions);
-
-          startDate = startDate.add('1', 'week');
-        }
-      });
-    });
-    return dateMap;
+    return date.format('DD/MM/YYYY');
   }
 
   function generateStoryStatsFromPeriodWindows(periodWindows) {
-    var dateMap = getDateMap();
-    _.each(periodWindows, function(periodWindow) {
-      _.each(periodWindow, function(week) {
-        dateMap = populateTransitions(week.issues, dateMap);
-      });
-    });
-
+    var map = getDateMap();
     var data = [];
     var i = 0;
     _.each(periodWindows, function(periodWindow) {
-      var people = getPeopleFromWindow(periodWindow);
-      var weeklyThroughput = getWeeklyThroughput(periodWindow);
-      var throughputArray = weeklyThroughput.counts;
       var week = moment(periodWindow[periodWindow.length - 1].startDate, 'DD/MM/YYYY').add('1', 'week').format('DD/MM/YYYY');
-
       data.push({
         i: i++,
         week: week,
-        identifier: "throughput" + week.replace(/\//g, 'gap'),
-        people: people,
-        issueCount: weeklyThroughput.issues[weeklyThroughput.issues.length - 1].length,
-        bugCount: countBugs(weeklyThroughput.issues[weeklyThroughput.issues.length - 1]),
-        throughput: throughputArray,
-        throughputDates: weeklyThroughput.dates,
-        transitions: dateMap.get(week),
-        total: ss.sum(throughputArray),
-        average: Math.round(calculateAverage(throughputArray)),
-        stddev: Math.round(calculateStdDev(throughputArray))
+        transitions: map.get(week)
       });
     });
 
     return data;
   }
 
-  function getTransitionsDuration(issues) {
-    let duration = {
-      open: [],
-      development: [],
-      review: [],
-      pm: [],
-      qa: []
-    };
-
-    let openDuration = 0;
-    let developmentDuration = 0;
-    let reviewDuration = 0;
-    let pmDuration = 0;
-    let qaDuration = 0;
-    let count = 0;
+  function generateStoryBucketsFromIssues(issues) {
     _.each(issues, function(issue) {
-      _.each(issue.transitions, function(transition) {
-        if (transition.from == "Open" || transition.from == "Selected for Development" || transition.from == "Backlog" || transition.from == "Ready for Development" || transition.from == "Reopened" || transition.from == "Awaiting Manager Approval") {
-          openDuration += transition.duration;
-        } else if (transition.from == "In Development" || transition.from == "In Progress") {
-          developmentDuration += transition.duration;
-        } else if (transition.from == "In Review") {
-          reviewDuration += transition.duration;
-        } else if (transition.from == "Awaiting PM Review" || transition.from == "In PM Review") {
-          pmDuration += transition.duration;
-        } else if (transition.from == "Ready for QA") {
-          qaDuration += transition.duration;
-        } else if (transition.from == "Closed") {} else {
-          console.error("Untreated transition: " + transition.from);
+      let toString;
+      let fromTime = moment(new Date(issue.fields.created));
+      let toTime;
+      let histories = issue.changelog.histories;
+      for (var i = 0; i < histories.length; i++) {
+        let history = histories[i];
+        for (var k = 0; k < history.items.length; k++) {
+          let item = history.items[k];
+          if (item.field == 'status') {
+            toTime = moment(new Date(history.created));
+            while (fromTime.isBefore(toTime) || fromTime.isSame(toTime)) {
+              populateTransitions(fromTime, item.fromString, issue);
+              toString = item.toString;
+              fromTime = fromTime.add('1', 'week');
+            }
+            fromTime = toTime;
+          }
         }
-        count++;
-      });
+      }
+
+      if (toString) {
+        toTime = moment(new Date());
+        while (fromTime.isBefore(toTime) || fromTime.isSame(toTime)) {
+          populateTransitions(fromTime, toString, issue);
+          fromTime = fromTime.add('1', 'week');
+        }
+      }
     });
-    duration.open.push(openDuration > 0
-      ? openDuration / count
-      : 0);
-    duration.development.push(developmentDuration > 0
-      ? developmentDuration / count
-      : 0);
-    duration.review.push(reviewDuration > 0
-      ? reviewDuration / count
-      : 0);
-    duration.pm.push(pmDuration > 0
-      ? pmDuration / count
-      : 0);
-    duration.qa.push(qaDuration > 0
-      ? qaDuration / count
-      : 0);
-    return duration;
+    return _dataMap;
+  }
+
+  function populateTransitions(fromTime, transition, issue) {
+    let startDate = getDateFromMap(fromTime);
+
+    let transitions = _dataMap.get(startDate);
+
+    if (transitions.issues.get(issue.key) == transition) {
+      return;
+    }
+
+    transitions.issues.set(issue.key, transition);
+
+    if (transition == "Open" || transition == "Selected for Development" || transition == "Backlog" || transition == "Ready for Development" || transition == "Reopened" || transition == "Awaiting Manager Approval" || transition == "In Analysis" || transition == "Verified" || transition == "Ready for Estimation" || transition == "Analyzed") {
+      transitions.open += 1;
+    } else if (transition == "In Development" || transition == "In Progress" || transition == "In Design") {
+      transitions.development += 1;
+    } else if (transition == "In Review") {
+      transitions.review += 1;
+    } else if (transition == "Awaiting PM Review" || transition == "In PM Review") {
+      transitions.pm += 1;
+    } else if (transition == "Ready for QA") {
+      transitions.qa += 1;
+    } else if (transition == "Closed") {
+      transitions.closed += 1;
+    } else {
+      console.error("Untreated transition: " + transition);
+    }
+
+    _dataMap.set(startDate, transitions);
   }
 
   function countBugs(issues) {
@@ -190,35 +152,6 @@ appServices.factory('Statistics', function($resource, config) {
       }
     });
     return bugCount;
-  }
-
-  function gatherIssueTime(issues) {
-
-    _.each(issues.issueData, function(issue) {
-      var startDate;
-      _.each(issue.fields.subtasks, function(subtask) {
-        console.log("gatherIssueTime " + subtask.fields.issuetype.name);
-        if (subtask.fields.issuetype.name === "Design Review Sub-Task") {
-          startDate = findStartDate(subtask.self);
-        }
-      });
-      var closureDate = findIssueClosureDate(issue);
-      console.log(startDate + ' to ' + closureDate);
-    });
-  }
-
-  function findStartDate(issueUrl) {
-    return "dunno";
-  }
-
-  function findIssueClosureDate(issue) {
-    _.each(issue.changelog.histories, function(change) {
-      _.each(change.items, function(item) {
-        if (item.field === 'status' && (item.toString === 'Resolved' || item.toString === 'Closed')) {
-          return change.created;
-        }
-      });
-    });
   }
 
   function createWeekBuckets() {
@@ -235,50 +168,6 @@ appServices.factory('Statistics', function($resource, config) {
       startOfBucket.add('1', 'week');
     }
     return buckets;
-  }
-
-  function generateResolvedStoryBucketsFromIssues(issues) {
-    var weekBuckets = createWeekBuckets();
-    _.each(issues, function(issue) {
-      if (issue.fields.issuetype.name === 'Story') {
-        issue.transitions = [];
-        var resolutionDate = moment(issue.fields.resolutiondate.substr(0, 10), 'YYYY-MM-DD');
-        _.each(weekBuckets, function(bucket) {
-          if (resolutionDate.isAfter(moment(bucket.startDate, 'DD/MM/YYYY')) && resolutionDate.isBefore(moment(bucket.startDate, 'DD/MM/YYYY').add('1', 'week'))) {
-            let fromTime = new Date(issue.fields.created);
-            let histories = issue.changelog.histories;
-            for (var i = 0; i < histories.length; i++) {
-              let history = histories[i];
-              for (var k = 0; k < history.items.length; k++) {
-                let item = history.items[k];
-                if (item.field == 'status') {
-                  let toTime = new Date(history.created);
-                  issue.transitions.push({
-                    'from': item.fromString,
-                    'to': item.toString,
-                    'fromTime': fromTime,
-                    'toTime': toTime
-                  });
-                  fromTime = toTime;
-                }
-              }
-            }
-
-            let latest = issue.transitions[issue.transitions.length - 1];
-            issue.transitions.push({
-              'from': "Closed",
-              'to': "Closed",
-              'fromTime': latest.toTime,
-              'toTime': new Date()
-            });
-
-            bucket.issues.push(issue);
-          }
-        });
-      }
-    });
-
-    return weekBuckets;
   }
 
   function generateResolvedBucketsFromIssues(issues) {
@@ -508,7 +397,6 @@ appServices.factory('Statistics', function($resource, config) {
 
     for (var i = 0; i < stats.length; i++) {
       var stat = stats[i];
-      var throughput = d3.round(stat.throughput[stat.throughput.length - 1]);
       var date = stat.week;
 
       openDuration.push({
@@ -560,28 +448,23 @@ appServices.factory('Statistics', function($resource, config) {
           values: closeDuration,
           key: 'Closed',
           area: true
-        },
-        {
+        }, {
           values: qaDuration,
           key: 'In QA',
           area: true
-        },
-        {
+        }, {
           values: pmDuration,
           key: 'In PM',
           area: true
-        },
-        {
+        }, {
           values: reviewDuration,
           key: 'In Review',
           area: true
-        },
-        {
+        }, {
           values: developmentDuration,
           key: 'In Development',
           area: true
-        },
-        {
+        }, {
           values: openDuration,
           key: 'Open',
           area: true
@@ -642,15 +525,15 @@ appServices.factory('Statistics', function($resource, config) {
     return stats;
   }
 
-  function generateStoryStatsFromBuckets(weeklyBuckets) {
-    var periodWindows = getPeriodWindows(weeklyBuckets);
+  function generateStoryStatsFromBuckets() {
+    var weekBuckets = createWeekBuckets();
+    var periodWindows = getPeriodWindows(weekBuckets);
     var stats = generateStoryStatsFromPeriodWindows(periodWindows);
-
     return stats;
   }
 
   return {
-    generateResolvedStoryBucketsFromIssues: generateResolvedStoryBucketsFromIssues,
+    generateStoryBucketsFromIssues: generateStoryBucketsFromIssues,
     generateStoryStatsFromBuckets: generateStoryStatsFromBuckets,
     generateGraphStoryDataFromStat: generateGraphStoryDataFromStat,
     generateResolvedBucketsFromIssues: generateResolvedBucketsFromIssues,

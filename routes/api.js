@@ -74,10 +74,28 @@ exports.throughputData = function(req, res) {
       "customfield_10193",
       "customfield_12020"
     ],
-    "expand": ["changelog"],
     "maxResults": 250
   };
 
+  jiraPostRequest(res, hostname + '/rest/api/latest/search', data, DAY_IN_MILLIS);
+};
+
+exports.storyData = function(req, res) {
+
+  var hostname = req.query.jiraHostName;
+  var component = req.query.component;
+  var projects = req.query.projects;
+
+  var query = "project in (" + projects.join(',') + ") AND issuetype = 'Story' AND " + component + " AND updated >= endOfWeek(-23)";
+
+  var data = {
+    "jql": query,
+    "fields": [
+      "key", "created"
+    ],
+    "expand": ["changelog"],
+    "maxResults": 250
+  };
   jiraPostRequest(res, hostname + '/rest/api/latest/search', data, DAY_IN_MILLIS);
 };
 

@@ -90,11 +90,16 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
   });
 
   runAndSchedule(function() {
+    JIRA.storyData.get(function(jiras) {
+      Statistics.generateStoryBucketsFromIssues(jiras.issues);
+      $scope.storyStats = Statistics.generateStoryStatsFromBuckets();
+      $scope.graphStoryData = Statistics.generateGraphStoryDataFromStat($scope.storyStats);
+    });
+  });
+
+  runAndSchedule(function() {
     JIRA.throughputData.get(function(jiras) {
       $scope.people = Statistics.getPeopleFromIssues(jiras.issues);
-      $scope.storyBuckets = Statistics.generateResolvedStoryBucketsFromIssues(jiras.issues);
-      $scope.storyStats = Statistics.generateStoryStatsFromBuckets($scope.storyBuckets);
-      $scope.graphStoryData = Statistics.generateGraphStoryDataFromStat($scope.storyStats);
       $scope.weeklyBuckets = Statistics.generateResolvedBucketsFromIssues(jiras.issues);
       $scope.stats = Statistics.generateStatsFromBuckets($scope.weeklyBuckets);
       $scope.graphData = Statistics.generateGraphDataFromStat($scope.stats);
@@ -200,7 +205,9 @@ function IndexCtrl($scope, $rootScope, $filter, config, JIRA, Statistics, $inter
       xAxis: {
         axisLabel: 'Week',
         tickFormat: function(d) {
-          return $scope.stats[d - 1] ? $scope.stats[d - 1].week : '';
+          return $scope.storyStats[d - 1]
+            ? $scope.storyStats[d - 1].week
+            : '';
         }
       },
       tooltipContent: function(key, x, y, e, graph) {

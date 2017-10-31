@@ -55,6 +55,10 @@ app.get('/api/throughputData', function(req, res) {
   api.throughputData(req, res);
 });
 
+app.get('/api/storyData', function(req, res) {
+  api.storyData(req, res);
+});
+
 app.get('/api/xml', function(req, res) {
   api.xml(req, res);
 });
