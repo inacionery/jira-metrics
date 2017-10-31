@@ -22,7 +22,19 @@ var angularModules = angular.module('myApp', [
 var jiraHostName = 'https://issues.liferay.com';
 
 var component = 'component in (Forms, subcomponents(LPS, Forms, \'true\'), \'Dynamic Data Lists\', subcomponents(LPS, \'Dynamic Data Lists\', \'true\'), \'Web Form\', subcomponents(LPS, \'Web Form\', \'true\'), \'Dynamic Data Mapping\', subcomponents(LPS, \'Dynamic Data Mapping\', \'true\'), Polls)';
-var people = ['inacio.nery', 'adam.brandizzi', 'leonardo.barros', 'marcellus.tavares', 'rafael.praxedes', 'pedro.queiroz', 'lino.alves', 'adriano.interaminense', 'aline.cantarelli', 'clovis.neto', 'marcela.cunha'];
+var people = [
+  'inacio.nery',
+  'adam.brandizzi',
+  'leonardo.barros',
+  'marcellus.tavares',
+  'rafael.praxedes',
+  'pedro.queiroz',
+  'lino.alves',
+  'adriano.interaminense',
+  'aline.cantarelli',
+  'clovis.neto',
+  'marcela.cunha'
+];
 
 angularModules.value('config', {
   title: 'Metrics Dashboard',
@@ -46,11 +58,6 @@ angularModules.constant('routes', [
     url: 'metrics',
     icon: 'fa-bar-chart'
   }
-  // , {
-  //   name: 'JIRA',
-  //   url: 'jira',
-  //   icon: 'fa-child'
-  // }
 ]);
 
 angularModules.config(function($stateProvider, $urlRouterProvider, $locationProvider) {

@@ -1,12 +1,12 @@
 .row
   .col-lg-12.col-md-12
     rd-widget
-      rd-widget-header(icon="fa-bar-chart", title="Stories Resolved")
+      rd-widget-header(icon="fa-bar-chart", title="Story")
         a(ng-click="toggleFullScreen(chartStoryOptions)", title="Expand to Fullscreen")
           i.fa.fa-expand
       rd-widget-body.medium.no-padding(loading="{{!graphStoryData.resolvedStories}}")
         .full(id="throughput", fullscreen="chartStoryOptions.fullscreen", only-watched-property)
-          h3.center(ng-hide="!chartStoryOptions.fullscreen") Stories Resolved
+          h3.center(ng-hide="!chartStoryOptions.fullscreen") Story
           .full(style="height: 95%")
             nvd3(options='chartStoryOptions', data='graphStoryData.resolvedStories')
 .row

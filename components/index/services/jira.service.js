@@ -13,6 +13,19 @@ appServices.factory('JIRA', function($resource, config) {
       }
     }),
 
+    storyData: $resource('api/storyData', {
+      jiraHostName: config.jiraHostName,
+      component: config.component,
+      'projects[]': config.projects,
+      'completionTypes[]': config.completionTypes,
+      issueTypes: config.issueTypes
+    }, {
+      get: {
+        method: 'GET',
+        cache: true
+      }
+    }),
+
     dailyCreated: $resource('api/search', {
       jiraHostName: config.jiraHostName,
       component: config.component,
